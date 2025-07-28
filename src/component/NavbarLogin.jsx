@@ -1,12 +1,54 @@
-import { IoSearch } from "react-icons/io5";
+import { useState, useRef, useEffect } from 'react';
+import { MdNotificationsNone, MdOutlineSearch, MdOutlineLogout, MdPerson, MdSettings } from 'react-icons/md';
+import { FaRegHeart } from 'react-icons/fa';
+import { LuMessageCircleMore } from 'react-icons/lu';
+import { FiBox } from 'react-icons/fi';
+import { useNavigate } from "react-router-dom";
 
 const NavbarLogin = () => {
+  const [hover, setHover] = useState(false);
+  const [activePopup, setActivePopup] = useState(null);
+  const dropdownRef = useRef();
+  const navigate = useNavigate();
+
+  const togglePopup = (type) => {
+    setActivePopup((prev) => (prev === type ? null : type));
+  };
+
+  // بستن دراپ‌داون با کلیک بیرون
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActivePopup(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleProfileItemClick = (label) => {
+    if (label === "Settings") {
+      navigate("/settings");
+    } else if (label === "Logout") {
+      const confirmed = window.confirm("Are you sure you want to log out?");
+      if (confirmed) {
+        navigate("/"); 
+      }
+    } else if (label === "My Profile") {
+      navigate("/profile");
+    }
+    setActivePopup(null);
+  };
+
   return (
-    <div className="flex items-center bg-[#145959] mx-8 m-8 rounded-2xl w-360 h-24">
-      <div>
-        <img src="/icon.png" alt="Logo" className="h-21 p-6 m-10 w-21" />
+    <div className="flex flex-col lg:flex-row items-center justify-between bg-[#145959] mx-4 my-4 p-4 rounded-2xl lg:h-24 relative">
+      {/* لوگو */}
+      <div className="flex justify-center items-center mb-4 lg:mb-0">
+        <img src="/icon.png" alt="Logo" className="h-16 w-auto" />
       </div>
-      <div className="flex items-center border pl-4 gap-2 bg-white border-gray-500/30 h-[60px] rounded-2xl overflow-hidden max-w-md w-full">
+
+      {/* جستجو */}
+      <div className="flex items-center border pl-4 gap-2 bg-white border-gray-300 h-[50px] rounded-xl overflow-hidden w-full lg:max-w-md">
         <input
           type="text"
           placeholder="Search for Freelancers or Services"
@@ -14,11 +56,111 @@ const NavbarLogin = () => {
         />
         <button
           type="submit"
-          className="flex justify-center items-center bg-[#2E90EB] w-22 h-full rounded text-sm text-white"
+          className="flex justify-center items-center bg-[#2E90EB] px-4 h-full rounded text-white"
         >
-          <IoSearch className="w-5 h-5" />
+          <MdOutlineSearch className="w-5 h-5" />
         </button>
       </div>
+
+      {/* بخش راست */}
+      <div className="flex items-center gap-6 mt-4 lg:mt-0 relative" ref={dropdownRef}>
+
+        {/* نوتیفیکیشن */}
+        <div className="relative cursor-pointer" onClick={() => togglePopup('notifications')}>
+          <MdNotificationsNone className='w-7 h-7 text-white' />
+          <span className="absolute top-0 right-0 block h-2 w-2 bg-red-600 rounded-full"></span>
+          {activePopup === 'notifications' && (
+            <Dropdown title="Notifications" items={["New message from Ali", "Order #123 delivered", "Payment received"]} onItemClick={(label) => alert(`${label} clicked`)} />
+          )}
+        </div>
+
+        {/* علاقه‌مندی‌ها */}
+        <div className="relative cursor-pointer" onClick={() => togglePopup('favorites')}>
+          <FaRegHeart className='w-7 h-7 text-white' />
+          {activePopup === 'favorites' && (
+            <Dropdown title="Favorites" items={["No favorite items yet."]} onItemClick={(label) => alert(`${label} clicked`)} />
+          )}
+        </div>
+
+        {/* پیام‌ها */}
+        <div className="relative cursor-pointer" onClick={() => togglePopup('messages')}>
+          <LuMessageCircleMore className='w-7 h-7 text-white' />
+          {activePopup === 'messages' && (
+            <Dropdown title="Messages" items={["No new messages."]} onItemClick={(label) => alert(`${label} clicked`)} />
+          )}
+        </div>
+
+        {/* سفارش */}
+        <div className="relative">
+          <button
+            onClick={() => togglePopup('order')}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            className={`border flex items-center gap-2 border-white px-5 py-2 rounded-xl transition duration-300
+              ${hover ? "bg-white text-[#145959]" : "bg-[#145959] text-white"}`}
+          >
+            <img
+              src={hover ? "/orderblue.svg" : "/order.svg"}
+              alt="order"
+              className="w-6 h-6"
+            />
+            Order
+          </button>
+          {activePopup === 'order' && (
+            <Dropdown title="Orders" items={["No current orders."]} icon={<FiBox />} />
+          )}
+        </div>
+
+        {/* پروفایل */}
+        <div className="relative cursor-pointer mr-6" onClick={() => togglePopup('profile')}>
+          <img src="/profile.png" alt="Profile" className="w-12 h-12 rounded-full" />
+          <span className="absolute bottom-0 right-0 block h-4 w-4 bg-green-500 border-2 border-white rounded-full"></span>
+          {activePopup === 'profile' && (
+            <Dropdown
+              title="Account"
+              items={[
+                { label: "My Profile", icon: <MdPerson /> },
+                { label: "Settings", icon: <MdSettings /> },
+                { label: "Logout", icon: <MdOutlineLogout />, danger: true },
+              ]}
+              isProfile
+              onItemClick={handleProfileItemClick}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// کامپوننت دراپ‌داون
+const Dropdown = ({ title, items, isProfile = false, icon, onItemClick }) => {
+  return (
+    <div className="absolute right-0 mt-2 w-64 bg-white text-black shadow-xl rounded-xl p-4 z-50 animate-dropdown transition-all duration-300">
+      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+        {icon && <span className="text-lg">{icon}</span>}
+        {title}
+      </p>
+      <ul className="text-sm space-y-1">
+        {items.map((item, index) => {
+          const label = typeof item === "string" ? item : item.label;
+          const icon = typeof item === "object" ? item.icon : null;
+          const isDanger = typeof item === "object" && item.danger;
+
+          return (
+            <li
+              key={index}
+              className={`flex items-center gap-2 py-2 px-3 rounded hover:bg-gray-100 cursor-pointer transition ${
+                isDanger ? "text-red-500 hover:bg-red-100" : ""
+              }`}
+              onClick={() => onItemClick && onItemClick(label)}
+            >
+              {icon && <span className="text-lg">{icon}</span>}
+              {label}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };
