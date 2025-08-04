@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { MdNotificationsNone, MdOutlineSearch, MdOutlineLogout, MdPerson, MdSettings } from 'react-icons/md';
+import { MdNotificationsNone, MdOutlineSearch, MdOutlineLogout, MdSettings } from 'react-icons/md';
+import { RiHome3Line } from "react-icons/ri";
 import { FaRegHeart } from 'react-icons/fa';
 import { LuMessageCircleMore } from 'react-icons/lu';
 import { FiBox } from 'react-icons/fi';
 import { useNavigate } from "react-router-dom";
+import Dropdown from './DropDown';
 
 const NavbarLogin = () => {
   const [hover, setHover] = useState(false);
@@ -33,8 +35,8 @@ const NavbarLogin = () => {
       if (confirmed) {
         navigate("/");
       }
-    } else if (label === "My Profile") {
-      navigate("/profile");
+    } else if (label === "Dashboard") {
+      navigate("/dashboard");
     }
     setActivePopup(null);
   };
@@ -56,7 +58,7 @@ const NavbarLogin = () => {
             />
             <button
               type="submit"
-              className="flex justify-center items-center bg-[#2E90EB] px-4 h-full rounded text-white"
+              className="flex justify-center items-center bg-[#2E90EB] px-4 h-full cursor-pointer rounded text-white"
             >
               <MdOutlineSearch className="w-5 h-5" />
             </button>
@@ -70,7 +72,7 @@ const NavbarLogin = () => {
             <MdNotificationsNone className="w-7 h-7 text-white" />
             <span className="absolute top-0 right-0 block h-2 w-2 bg-red-600 rounded-full"></span>
             {activePopup === 'notifications' && (
-              <Dropdown title="Notifications" items={["New message from Ali", "Order #123 delivered", "Payment received"]}/>
+              <Dropdown title="Notifications" items={["New message from Matin 🤨", "Wow! 🥹", "Payment received 🥸"]}/>
             )}
           </div>
 
@@ -78,17 +80,17 @@ const NavbarLogin = () => {
           <div className="relative cursor-pointer" onClick={() => togglePopup('favorites')}>
             <FaRegHeart className="w-7 h-7 text-white" />
             {activePopup === 'favorites' && (
-              <Dropdown title="Favorites" items={["No favorite items yet."]} />
+              <Dropdown title="Favorites" items={["No favorite items yet. 😁"]} />
             )}
           </div>
 
-          {/* Messages */}
+          {/* Messages
           <div className="relative cursor-pointer" onClick={() => togglePopup('messages')}>
             <LuMessageCircleMore className="w-7 h-7 text-white" />
             {activePopup === 'messages' && (
-              <Dropdown title="Messages" items={["No new messages."]}/>
+              <Dropdown title="Messages" items={["No new messages. ☹️"]}/>
             )}
-          </div>
+          </div> */}
 
          {/* Order */}
           <div className="relative">
@@ -107,7 +109,7 @@ const NavbarLogin = () => {
               Order
             </button>
             {activePopup === 'order' && (
-              <Dropdown title="Orders" items={["No current orders."]} icon={<FiBox />} />
+              <Dropdown title="Orders" items={["No current orders. 😏"]} icon={<FiBox />} />
             )}
           </div>
 
@@ -119,7 +121,7 @@ const NavbarLogin = () => {
               <Dropdown
                 title="Account"
                 items={[
-                  { label: "My Profile", icon: <MdPerson /> },
+                  { label: "Dashboard", icon: <RiHome3Line /> },
                   { label: "Settings", icon: <MdSettings /> },
                   { label: "Logout", icon: <MdOutlineLogout />, danger: true },
                 ]}
@@ -134,35 +136,6 @@ const NavbarLogin = () => {
   );
 };
 
-const Dropdown = ({ title, items, isProfile = false, icon, onItemClick }) => {
-  return (
-    <div className="absolute right-0 mt-2 w-64 bg-white text-black shadow-xl rounded-xl p-4 z-50 animate-dropdown transition-all duration-300">
-      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-        {icon && <span className="text-lg">{icon}</span>}
-        {title}
-      </p>
-      <ul className="text-sm space-y-1">
-        {items.map((item, index) => {
-          const label = typeof item === "string" ? item : item.label;
-          const icon = typeof item === "object" ? item.icon : null;
-          const isDanger = typeof item === "object" && item.danger;
-
-          return (
-            <li
-              key={index}
-              className={`flex items-center gap-2 py-2 px-3 rounded hover:bg-gray-100 cursor-pointer transition ${
-                isDanger ? "text-red-500 hover:bg-red-100" : ""
-              }`}
-              onClick={() => onItemClick && onItemClick(label)}
-            >
-              {icon && <span className="text-lg">{icon}</span>}
-              {label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-};
+<Dropdown />
 
 export default NavbarLogin;
